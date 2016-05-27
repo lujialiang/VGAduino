@@ -120,7 +120,6 @@ int execute (int argc, const char * const * argv)
     } 
     //--------------WRITE--------------
       else if (strcmp (argv[i], _CMD_WR) == 0) {
-      print ("wr mem\n\r");
       if (++i < argc) {
         uint16_t addr = 0;
         uint8_t data = 0;
@@ -133,18 +132,18 @@ int execute (int argc, const char * const * argv)
           return 1;
         }
         if (++i < argc) {
-          if (data = atoi (argv[i])) {
-            print ("addr = '");
-            Serial.print (addr);
-            print ("' data = '");
-            Serial.print (data);
-            print ("' start to write here...\n\r");
-            print ("curent data = ");
-            Serial.print(*(volatile uint8_t*)(addr));
-            print ("\n\rwrite...\n\r");
+          if (data = atoi(argv[i])) {
+            print ("curent data = 0x");
+            Serial.print(*(volatile uint8_t*)(addr), HEX);
+            print ("\n\rwrite... ");
+            print ("addr = 0x");
+            Serial.print (addr, HEX);
+            print (" data = 0x");
+            Serial.print (data, HEX);
+            print ("\n\r");
             *(volatile uint8_t*)(addr) = data;
-            print ("curent data = ");
-            Serial.print(*(volatile uint8_t*)(addr));
+            print ("curent data = 0x");
+            Serial.print(*(volatile uint8_t*)(addr), HEX);
             print ("\n\r");
             return 0;
           } else {
@@ -152,7 +151,7 @@ int execute (int argc, const char * const * argv)
             print (argv[i]);
             print ("' data not support\n\r");
             return 1;
-          } 
+          }
         } else {
           print ("specify data\n\r");
           return 1;
@@ -161,7 +160,9 @@ int execute (int argc, const char * const * argv)
           print ("specify addr & data\n\r");
         return 1;
       }
-    } else if (strcmp (argv[i], _CMD_RD) == 0) {
+    } 
+    //--------------READ--------------
+      else if (strcmp (argv[i], _CMD_RD) == 0) {
       print ("rd mem\n\r");
     } else {
       print ("command: '");

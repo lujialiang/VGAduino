@@ -7,11 +7,7 @@ extern "C" {
 microrl_t rl;
 microrl_t * prl = &rl;
 
-
-int firstSensor = 0;    // first analog sensor
-int secondSensor = 0;   // second analog sensor
-int thirdSensor = 0;    // digital sensor
-int inByte = 0;         // incoming serial byte
+int inByte = 0; // incoming serial byte
 
 void setup() {
   DDRC = 0xFF;
@@ -35,9 +31,6 @@ void setup() {
     ; // wait for serial port to connect. Needed for native USB port only
   }
 
-  pinMode(2, INPUT);   // digital sensor is on digital pin 2
-  establishContact();  // send a byte to establish contact until receiver responds
-
   // call init with ptr to microrl instance and print callback
   microrl_init (prl, print);
   // set callback for execute
@@ -47,41 +40,14 @@ void setup() {
   // set callback for Ctrl+C
   microrl_set_sigint_callback (prl, sigint);
 
-  prl->print("Test for prl->print(const char* str)\r\n");
   print_help();
-  
 }
 
 void loop() {
-  // if we get a valid byte, read analog ins:
   if (Serial.available() > 0) {
     // get incoming byte:
     inByte = Serial.read();
     microrl_insert_char (prl, inByte);
-/*
-    // read first analog input, divide by 4 to make the range 0-255:
-    firstSensor = analogRead(A0) / 4;
-    // delay 10ms to let the ADC recover:
-    delay(10);
-    // read second analog input, divide by 4 to make the range 0-255:
-    secondSensor = analogRead(1) / 4;
-    // read  switch, map it to 0 or 255L
-    thirdSensor = map(digitalRead(2), 0, 1, 0, 255);
-    // send sensor values:
-    //Serial.write(firstSensor);
-    //Serial.write(secondSensor);
-    //Serial.write(thirdSensor);
-    Serial.println(firstSensor);
-    Serial.println(secondSensor);
-    Serial.println(thirdSensor);
-*/
-  }
-}
-
-void establishContact() {
-  while (Serial.available() <= 0) {
-    Serial.print('A');   // send a capital A
-    delay(300);
   }
 }
 
