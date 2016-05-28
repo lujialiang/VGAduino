@@ -13,6 +13,10 @@ void setup() {
   DDRC = 0xFF;
   PORTC = 0x00;
 
+  //ROM Page select L0..L4, 32 pages
+  DDRL |= 0x1F;
+  PORTL &= 0xE0; // Page 0
+
   XMCRA |= (1 << SRE); // EMI on
 
   DDRH |= (1 << 3);
@@ -21,12 +25,14 @@ void setup() {
   DDRH |= (1 << 6);
 
   PORTH |= (1 << 3); //~CE FLASH Hi
-  PORTH &= ~(1 << 4); //~CE RAM Lo
-  PORTH |= (1 << 5); //~CE ROM Hi
+  //PORTH &= ~(1 << 4); //~CE RAM Lo
+  PORTH |= (1 << 4); //~CE RAM Hi
+  PORTH &= ~(1 << 5); //~CE ROM Lo
+  //PORTH |= (1 << 5); //~CE ROM Hi
   PORTH |= (1 << 6); //~CE BUF Hi
 
-  // start serial port at 9600 bps:
-  Serial.begin(9600);
+  // start serial port at 115200 bps:
+  Serial.begin(57600);
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
