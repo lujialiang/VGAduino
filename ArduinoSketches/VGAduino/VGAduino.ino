@@ -1,6 +1,7 @@
 extern "C" {
 #include "config.h"
 #include "microrl.h"
+#include "flash.h"
 }
 
 // create microrl object and pointer on it
@@ -25,11 +26,19 @@ void setup() {
   DDRH |= (1 << 6);
 
   PORTH |= (1 << 3); //~CE FLASH Hi
-  //PORTH &= ~(1 << 4); //~CE RAM Lo
   PORTH |= (1 << 4); //~CE RAM Hi
   PORTH &= ~(1 << 5); //~CE ROM Lo
-  //PORTH |= (1 << 5); //~CE ROM Hi
   PORTH |= (1 << 6); //~CE BUF Hi
+
+  DDRD |= (1 << 4);
+  DDRD |= (1 << 5);
+  DDRD |= (1 << 6);
+  DDRD &= ~(1 << 7); // RB_FLASH_IN
+
+  PORTD |= (1 << 4); // WP FLASH Hi
+  PORTD &= ~(1 << 5); // ALE FLASH Lo
+  PORTD &= ~(1 << 6); // CLE FLASH Lo
+  PORTD |= (1 << 7); // RB_FLASH_IN PULL UP
 
   // start serial port at 115200 bps:
   Serial.begin(57600);

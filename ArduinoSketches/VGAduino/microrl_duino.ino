@@ -61,7 +61,7 @@ void set_port_val (unsigned char * port, int pin, int val)
 }
 
 //*****************************************************************************
-#define HEXDUMP_COLS 32
+#define HEXDUMP_COLS 48
  
 void hexdump(unsigned int addr, unsigned int len)
 {
@@ -218,102 +218,35 @@ int execute (int argc, const char * const * argv)
     } 
     //--------------READ--------------
       else if (strcmp (argv[i], _CMD_RD) == 0) {
-      print ("rd mem\n\r");
-      PORTL &= 0xE0; // Page 0
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x01; // GoTo Page 1
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x02; // GoTo Page 2
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x03; // GoTo Page 3
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x04; // GoTo Page 4
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x05; // GoTo Page 5
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x06; // GoTo Page 6
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x07; // GoTo Page 7
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x08; // GoTo Page 8
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x09; // GoTo Page 9
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0A; // GoTo Page A
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0B; // GoTo Page B
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0C; // GoTo Page C
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0D; // GoTo Page D
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0E; // GoTo Page E
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x0F; // GoTo Page F
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x10; // GoTo Page 10
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x11; // GoTo Page 11
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x12; // GoTo Page 12
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x13; // GoTo Page 13
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x14; // GoTo Page 14
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x15; // GoTo Page 15
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x16; // GoTo Page 16
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x17; // GoTo Page 17
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x18; // GoTo Page 18
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x19; // GoTo Page 19
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1A; // GoTo Page 1A
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1B; // GoTo Page 1B
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1C; // GoTo Page 1C
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1D; // GoTo Page 1D
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1E; // GoTo Page 1E
-      hexdump(0x8000, 0x8000);
-      PORTL &= 0xE0; // Page 0
-      PORTL |= 0x1F; // GoTo Page 1F
-      hexdump(0x8000, 0x8000);
+      if (++i < argc) {
+        uint16_t row_addr;
+        if (row_addr = atoi(argv[i])) {
+          ;
+        } else {
+          row_addr = 0;
+          /*print ("row_addr = '");
+          print (argv[i]);
+          print ("' addr not support\n\r");
+          return 1;*/
+        }
+        print ("rd mem\n\r");
+        
+        uint8_t buf_id[5];
+        print ("FLASH ID dump ---->\n\r");
+        flash_read_id(&buf_id[0]);
+        hexdump((unsigned int)&buf_id[0], 0x0005);
+        
+        uint8_t buf_mem[2112];
+        print ("FLASH row_addr = 0x");
+        Serial.print (row_addr, HEX);
+        print (" dump j=");
+        Serial.print (flash_read(&buf_mem[0], row_addr));
+        print (" ---->\n\r");
+        hexdump((unsigned int)&buf_mem[0], 2112);
+      } else {
+        print ("specify row_addr\n\r");
+        return 1;
+      }
     } else {
       print ("command: '");
       print ((char*)argv[i]);
