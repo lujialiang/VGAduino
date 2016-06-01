@@ -10,6 +10,7 @@ AVR platform specific implementation routines (for Atmega8, rewrite for your MC)
 #define _CMD_SET    "set_port"
 #define _CMD_WR     "write"
 #define _CMD_RD     "read"
+#define _CMD_ERASE  "erase"
 // arguments for set/clear
 #define _SCMD_PA  "PA"
 #define _SCMD_PB  "PB"
@@ -23,11 +24,11 @@ AVR platform specific implementation routines (for Atmega8, rewrite for your MC)
 #define _SCMD_PK  "PK"
 #define _SCMD_PL  "PL"
 
-#define _NUM_OF_CMD 6
+#define _NUM_OF_CMD 7
 #define _NUM_OF_SETCLEAR_SCMD 11
 
 //available  commands
-char * keyworld [] = {_CMD_HELP, _CMD_CLEAR, _CMD_SET, _CMD_CLR, _CMD_WR, _CMD_RD};
+char * keyworld [] = {_CMD_HELP, _CMD_CLEAR, _CMD_SET, _CMD_CLR, _CMD_WR, _CMD_RD, _CMD_ERASE};
 // 'set/clear' command argements
 char * set_clear_key [] = {_SCMD_PA, _SCMD_PB, _SCMD_PC, _SCMD_PD, _SCMD_PE, _SCMD_PF, _SCMD_PG, _SCMD_PH, _SCMD_PJ, _SCMD_PK, _SCMD_PL};
 
@@ -240,14 +241,40 @@ int execute (int argc, const char * const * argv)
         print ("FLASH row_addr = 0x");
         Serial.print (row_addr, HEX);
         print (" dump j=");
-        Serial.print (flash_read(&buf_mem[0], row_addr));
+        Serial.print (flash_read_row(&buf_mem[0], row_addr));
         print (" ---->\n\r");
         hexdump((unsigned int)&buf_mem[0], 2112);
       } else {
         print ("specify row_addr\n\r");
         return 1;
       }
-    } else {
+    } 
+    //--------------ERASE--------------
+      else if (strcmp (argv[i], _CMD_ERASE) == 0) {
+      if (++i < argc) {
+        uint16_t row_addr;
+        if (row_addr = atoi(argv[i])) {
+          ;
+        } else {
+          //row_addr = 0;
+          print ("row_addr = '");
+          print (argv[i]);
+          print ("' addr not support\n\r");
+          return 1;
+        }
+        print ("erase mem\n\r");
+        print ("FLASH row_addr = 0x");
+        Serial.print (row_addr, HEX);
+        print (" erase...\n\r");
+        Serial.print (flash_erase_block(row_addr));
+        print (" ---->\n\r");
+      } else {
+        print ("specify row_addr\n\r");
+        return 1;
+      }
+    } 
+    //--------------NONE--------------
+      else {
       print ("command: '");
       print ((char*)argv[i]);
       print ("' Not found.\n\r");
