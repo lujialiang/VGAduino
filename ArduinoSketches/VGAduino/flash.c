@@ -22,7 +22,7 @@ void flash_act() {
 int flash_wait_rb(int max_wait_time){
   int j;
   PORTJ |= (1 << 0);
-  for(j = 0; ((RB_FLASH() == 0) & (j < max_wait_time)); j++) {
+  for(j = 0; ((RB_FLASH() == 0) && (j < max_wait_time)); j++) {
   }
   PORTJ &= ~(1 << 0);
   return j;
@@ -30,14 +30,14 @@ int flash_wait_rb(int max_wait_time){
 
 uint8_t flash_read_status() {
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x70;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x70;
   CLE_FLASH_LO();
   return *(volatile uint8_t*)(FLASH_ADDR);
 }
 
 uint8_t flash_read_edc_status() {
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x78;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x78;
   CLE_FLASH_LO();
   return *(volatile uint8_t*)(FLASH_ADDR);
 }
@@ -50,7 +50,7 @@ int flash_reset (uint8_t wp) {
     WP_FLASH_HI();
   }
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xFF;//RESET Command
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0xFF;//RESET Command
   CLE_FLASH_LO();
   return flash_wait_rb(0x7FFF);
 }
@@ -59,10 +59,10 @@ void flash_read_id (uint8_t buf[]) {
   flash_act();
 
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x90;//Read ID Command
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x90;//Read ID Command
   CLE_FLASH_LO();
   ALE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x00;//Address 1 cycle
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;//Address 1 cycle
   ALE_FLASH_LO();
   for(int i = 0; i < 5; i++) {
     buf[i] = *(volatile uint8_t*)(FLASH_ADDR);
@@ -74,16 +74,16 @@ int flash_read_row (uint8_t buf[], uint16_t row_addr) {
   flash_act();
 
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x00;//Command
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;//Command
   CLE_FLASH_LO();
   ALE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x00;//Address 1 cycle
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x00;//Address 2 cycle
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xFF && row_addr;//Address 3 cycle
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xFF && (row_addr >> 8);//Address 4 cycle
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;//Address 1 cycle
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;//Address 2 cycle
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)(0xFF & row_addr);//Address 3 cycle
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)((0xFF & row_addr) >> 8);//Address 4 cycle
   ALE_FLASH_LO();
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x30;//Read Command
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x30;//Read Command
   CLE_FLASH_LO();
   j = flash_wait_rb(0x7FFF);
   for(int i = 0; i < 2112; i++) {
@@ -94,20 +94,39 @@ int flash_read_row (uint8_t buf[], uint16_t row_addr) {
 
 int flash_erase_block (uint16_t row_addr) {
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0x60;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x60;
   CLE_FLASH_LO();
   ALE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xFF && row_addr;
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xFF && (row_addr >> 8);
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)(0xFF & row_addr);
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)((0xFF & row_addr) >> 8);
   ALE_FLASH_LO();
   CLE_FLASH_HI();
-  *(volatile uint8_t*)(FLASH_ADDR) = 0xD0;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0xD0;
   CLE_FLASH_LO();
   return flash_wait_rb(0x7FFF);
 }
 
 int flash_page_program(uint8_t buf[], uint16_t row_addr) {
+  int j;
+  flash_reset(1);
 
+  CLE_FLASH_HI();
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x80;
+  CLE_FLASH_LO();
+  ALE_FLASH_HI();
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)0x00;
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)(0xFF & row_addr);
+  *(volatile uint8_t*)(FLASH_ADDR) = (uint8_t)((0xFF & row_addr) >> 8);
+  ALE_FLASH_LO();
+  for(int i = 0; i < 2112; i++) {
+    *(volatile uint8_t*)(FLASH_ADDR) = buf[i];
+  }
+  CLE_FLASH_HI();
+  *(volatile uint8_t*)(FLASH_ADDR) = 0x10;
+  CLE_FLASH_LO();
+  j = flash_wait_rb(0x7FFF);
+  return j;
 }
 
 int flash_read_for_copy_back(uint16_t row_addr){

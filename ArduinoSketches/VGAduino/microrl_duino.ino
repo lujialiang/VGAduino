@@ -11,6 +11,7 @@ AVR platform specific implementation routines (for Atmega8, rewrite for your MC)
 #define _CMD_WR     "write"
 #define _CMD_RD     "read"
 #define _CMD_ERASE  "erase"
+#define _CMD_TEST   "test"
 // arguments for set/clear
 #define _SCMD_PA  "PA"
 #define _SCMD_PB  "PB"
@@ -24,11 +25,11 @@ AVR platform specific implementation routines (for Atmega8, rewrite for your MC)
 #define _SCMD_PK  "PK"
 #define _SCMD_PL  "PL"
 
-#define _NUM_OF_CMD 7
+#define _NUM_OF_CMD 8
 #define _NUM_OF_SETCLEAR_SCMD 11
 
 //available  commands
-char * keyworld [] = {_CMD_HELP, _CMD_CLEAR, _CMD_SET, _CMD_CLR, _CMD_WR, _CMD_RD, _CMD_ERASE};
+char * keyworld [] = {_CMD_HELP, _CMD_CLEAR, _CMD_SET, _CMD_CLR, _CMD_WR, _CMD_RD, _CMD_ERASE, _CMD_TEST};
 // 'set/clear' command argements
 char * set_clear_key [] = {_SCMD_PA, _SCMD_PB, _SCMD_PC, _SCMD_PD, _SCMD_PE, _SCMD_PF, _SCMD_PG, _SCMD_PH, _SCMD_PJ, _SCMD_PK, _SCMD_PL};
 
@@ -102,6 +103,50 @@ void hexdump(unsigned int addr, unsigned int len)
       }
     Serial.print("\r\n");
     }
+  }
+}
+
+//*****************************************************************************
+void hwTest (uint8_t id)
+{
+  uint16_t i;
+  uint16_t row_addr;
+  uint8_t buf[2112];
+  uint8_t buf2[2112];
+  if (id == 0) {
+    for(row_addr = 0; (row_addr < 0x0040) ; row_addr++) {
+      print ("Flash Test Start\n\r");
+    //create temp bufer[2112]
+    //write some data to bufer
+      for(i = 0; i < 2112; i++) {
+        if (i == row_addr) {
+          buf[i] = 0x00;
+        } else {
+          buf[i] = 0xFF;
+        }
+      }
+    //dump bufer to screen
+      print ("hexdump((unsigned int)&buf[0], 2112);\r\n");
+      //hexdump((unsigned int)&buf[0], 2112);
+    //write bufer to flash at row addres 0xFFF0
+      print ("FLASH row_addr = 0x");
+      Serial.print (row_addr, HEX);
+      print (" wait j=");
+      Serial.print (flash_page_program(&buf[0], row_addr));
+      print ("\n\r");
+    //dump bufer from flash to screen
+      //flash_read_row(&buf2[0], row_addr);
+      //print ("flash_read_row(&buf2[0], row_addr);\r\nhexdump((unsigned int)&buf2[0], 2112);\r\n");
+      //hexdump((unsigned int)&buf2[0], 2112);
+    }
+    return;
+  }
+  else if (id == 1) {
+    print ("Other Test Start\n\r");
+	return;
+  }
+  else {
+    print ("Test NONE\n\r");
   }
 }
 
@@ -217,7 +262,7 @@ int execute (int argc, const char * const * argv)
         return 1;
       }
     } 
-    //--------------READ--------------
+    //--------------FLASH READ--------------
       else if (strcmp (argv[i], _CMD_RD) == 0) {
       if (++i < argc) {
         uint16_t row_addr;
@@ -249,27 +294,50 @@ int execute (int argc, const char * const * argv)
         return 1;
       }
     } 
-    //--------------ERASE--------------
+    //--------------FLASH ERASE--------------
       else if (strcmp (argv[i], _CMD_ERASE) == 0) {
       if (++i < argc) {
         uint16_t row_addr;
         if (row_addr = atoi(argv[i])) {
           ;
         } else {
-          //row_addr = 0;
+          row_addr = 0;
           print ("row_addr = '");
           print (argv[i]);
-          print ("' addr not support\n\r");
-          return 1;
+          print ("' addr not support erase ALL!!!\n\r");
+          //return 1;
         }
-        print ("erase mem\n\r");
-        print ("FLASH row_addr = 0x");
-        Serial.print (row_addr, HEX);
-        print (" erase...\n\r");
-        Serial.print (flash_erase_block(row_addr));
-        print (" ---->\n\r");
+        if (row_addr == 0) {
+          // TODO
+        } else {
+          print ("erase mem\n\r");
+          print ("FLASH row_addr = 0x");
+          Serial.print (row_addr, HEX);
+          print (" erase...\n\r");
+          Serial.print (flash_erase_block(row_addr));
+          print (" ---->\n\r");
+        }
       } else {
         print ("specify row_addr\n\r");
+        return 1;
+      }
+    } 
+    //--------------TEST--------------
+      else if (strcmp (argv[i], _CMD_TEST) == 0) {
+      if (++i < argc) {
+        uint8_t test_id;
+        if (test_id = atoi(argv[i])) {
+          ;
+        } else {
+          test_id = 0;
+          print ("use test 0\n\r");
+        }
+        print ("Start TEST #\n\r");
+        Serial.print (test_id);
+        print ("\n\r");
+        hwTest(test_id);
+      } else {
+        print ("specify test_id\n\r");
         return 1;
       }
     } 
